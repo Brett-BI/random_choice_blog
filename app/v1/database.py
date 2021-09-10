@@ -33,6 +33,15 @@ class Article(BaseModel):
     def get_article(self, article_id: int) -> Dict:
         return self.select().filter_by(self.id == article_id).limit(1)
 
+    
+    def get_articles(self, count: int = 1) -> List[dict]:
+        _articles = self.select().order_by(Article.posted_date.desc()).limit(count) # self.posted_date doesn't work for some reason...
+        models = []
+        for _a in _articles:
+            models.append(_a.__data__)
+        
+        return models
+
 
     def get_random_article(self, count: int = 1) -> List[dict]:
         _articles = self.select().order_by(fn.Random()).limit(count)

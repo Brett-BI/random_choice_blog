@@ -62,6 +62,12 @@ def get_random_article(count: Optional[int] = 1):
     return jsonable_encoder(_articles)
 
 
+@app.get('/article/latest', response_model=List[ArticleResponseModel])
+def get_latest_articles(count: Optional[int] = 1):
+    _articles = Article().get_articles(count)
+    return jsonable_encoder(_articles)
+
+
 # def get_article(article_id, token: str = Depends(oauth2scheme)):
 @app.get('/article/{article_id}', response_model=ArticleResponseModel)
 def get_article(article_id):
