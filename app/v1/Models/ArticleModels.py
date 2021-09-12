@@ -8,6 +8,7 @@ class ArticleRequestModel(BaseModel):
 
 
 class ArticleResponseModel(BaseModel):
+    id: str
     title: str
     subtitle: str
     markup_content: str
