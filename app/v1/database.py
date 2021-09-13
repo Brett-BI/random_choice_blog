@@ -28,6 +28,11 @@ class Article(BaseModel):
 
     def create(self) -> None:
         self.save()
+
+    
+    def update_article(self, article) -> None:
+        _article = Article(**article.dict())
+        _article.save()
     
 
     def get_article(self, article_id: int) -> Dict:

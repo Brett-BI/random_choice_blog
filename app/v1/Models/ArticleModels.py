@@ -1,6 +1,9 @@
 from pydantic import BaseModel
 
+from typing import Optional
+
 class ArticleRequestModel(BaseModel):
+    id: Optional[str]
     title: str
     subtitle: str
     author: int = 1

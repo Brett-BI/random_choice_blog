@@ -77,9 +77,13 @@ def get_article(article_id):
     return jsonable_encoder(_article.__data__) # note: JSONResponse ignores the response_model
 
 
-@app.patch('/article/{article_id}/edit', status_code=201, response_model=ArticleResponseModel)
-def edit_article(article_id: str):
-    pass
+@app.patch('/article/{article_id}', status_code=201, response_model=ArticleResponseModel)
+def edit_article(article_id: str, article: ArticleRequestModel):
+    print(article)
+    print(article_id)
+    _article = Article().update_article(article)
+
+    return jsonable_encoder(_article)
 
 
 @app.post('/article', status_code=201)
