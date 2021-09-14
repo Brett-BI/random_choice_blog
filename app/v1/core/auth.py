@@ -10,7 +10,7 @@ from typing import Optional
 # lookup powershell hex encryption key generator
 SECRET_KEY = "381e25a883d3589ebd83f82e0712e627687837efcc09d9d803c5fc1104df7632"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 1
 
 fake_users_db = {
     "johndoe": {
@@ -25,6 +25,7 @@ fake_users_db = {
 class Token(BaseModel):
     access_token: str
     token_type: str
+    username: str
 
 class TokenData(BaseModel):
     username: Optional[str] = None
@@ -86,7 +87,7 @@ def fake_decode_token(token):
 async def get_current_user(token: str = Depends(oauth2scheme)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials.",
+        detail="Invalid credentials.",
         headers={"WWW-Authenticate": "Bearer"}
     )
     try:
