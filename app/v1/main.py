@@ -2,7 +2,7 @@ from fastapi import Depends, FastAPI, status
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, oauth2
 from fastapi.middleware.cors import CORSMiddleware
 from playhouse.shortcuts import model_to_dict
 from pydantic import BaseModel
@@ -87,7 +87,7 @@ def edit_article(article_id: str, article: ArticleRequestModel):
 
 
 @app.post('/article', status_code=201)
-def create_article(article: ArticleRequestModel):
+def create_article(article: ArticleRequestModel, token=Depends(oauth2scheme)):
     print(article)
     _article = Article(**article.dict())
     _article.create()

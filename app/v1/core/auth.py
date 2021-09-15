@@ -10,7 +10,7 @@ from typing import Optional
 # lookup powershell hex encryption key generator
 SECRET_KEY = "381e25a883d3589ebd83f82e0712e627687837efcc09d9d803c5fc1104df7632"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
 fake_users_db = {
     "johndoe": {
@@ -91,12 +91,15 @@ async def get_current_user(token: str = Depends(oauth2scheme)):
         headers={"WWW-Authenticate": "Bearer"}
     )
     try:
+        print(f'TOKEN: {token}')
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
+            print('no username?')
             raise credentials_exception
         token_data = TokenData(username=username)
     except JWTError:
+        print('JWTError occurred')
         raise credentials_exception
     user = get_user(fake_users_db, username=token_data.username)
     if user is None:
