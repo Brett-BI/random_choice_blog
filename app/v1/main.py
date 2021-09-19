@@ -1,3 +1,4 @@
+from time import sleep
 from fastapi import Depends, FastAPI, status
 from fastapi.exceptions import HTTPException
 from fastapi.encoders import jsonable_encoder
@@ -7,9 +8,10 @@ from fastapi.middleware.cors import CORSMiddleware
 from playhouse.shortcuts import model_to_dict
 from pydantic import BaseModel
 
-from database import Article, Author, db
+from database import Article, Author, User as UserTable, db
 from helpers import DefaultConverter
 from Models.ArticleModels import ArticleRequestModel, ArticleResponseModel
+from Models.UserModels import CreateUserRequestModel, UserResponseModel
 from core.auth import Token, authenticate_user, fake_users_db, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_active_user, User, oauth2scheme
 
 from datetime import datetime, timedelta
@@ -21,7 +23,7 @@ from typing import List, Optional
 app = FastAPI()
 
 db = db
-db.create_tables([Article])
+#db.create_tables([UserTable])
 
 origins = [
     "http://localhost",
@@ -39,7 +41,10 @@ app.add_middleware(
 
 @app.post('/token', response_model=Token)
 async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    #user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    print(form_data.username)
+    print(form_data.password)
+    user = authenticate_user(form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -47,14 +52,8 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
             headers={"WWW-Authenticate": "Bearer"}
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(data={"sub": user.username}, expires_delta=access_token_expires)
-    return {"access_token": access_token, "token_type": "bearer", "username": user.username }
-
-
-@app.get('/users/me', response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
-    print(current_user.__dir__)
-    return current_user
+    access_token = create_access_token(data={"sub": user.email}, expires_delta=access_token_expires)
+    return {"access_token": access_token, "token_type": "bearer" }
 
 
 @app.get('/article/random', response_model=List[ArticleResponseModel])
@@ -66,6 +65,7 @@ def get_random_article(count: Optional[int] = 1):
 @app.get('/article/latest', response_model=List[ArticleResponseModel])
 def get_latest_articles(count: Optional[int] = 1):
     _articles = Article().get_articles(count)
+    #sleep(3)
     return jsonable_encoder(_articles)
 
 
@@ -104,3 +104,26 @@ def get_my_info():
 @app.get('/me/articles')
 def get_my_articles():
     pass
+
+
+@app.post('/users', status_code=201, response_model=UserResponseModel)
+def create_user(user: CreateUserRequestModel):
+    hashed_pwd = UserTable.hash_password(user.password)
+    _temp_user = {
+        'full_name': '',
+        'email': user.email,
+        'about': '',
+        'password': hashed_pwd,
+        'active': True
+    }
+    _user = UserTable(**_temp_user)
+    _user.create()
+
+    return jsonable_encoder(_user.__data__)
+
+
+@app.get('/users/me', response_model=UserResponseModel)
+async def read_users_me(current_user: User = Depends(get_current_active_user)):
+    print(current_user.__data__)
+    #sleep(2)
+    return jsonable_encoder(current_user.__data__)

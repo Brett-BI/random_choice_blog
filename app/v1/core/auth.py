@@ -7,6 +7,8 @@ from pydantic import BaseModel
 from datetime import datetime, timedelta
 from typing import Optional
 
+from database import User
+
 # lookup powershell hex encryption key generator
 SECRET_KEY = "381e25a883d3589ebd83f82e0712e627687837efcc09d9d803c5fc1104df7632"
 ALGORITHM = "HS256"
@@ -29,11 +31,11 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: Optional[str] = None
 
-class User(BaseModel):
-    username: str
-    email: Optional[str] = None
-    full_name: Optional[str] = None
-    disabled: Optional[bool] = None
+# class User(BaseModel):
+#     username: str
+#     email: Optional[str] = None
+#     full_name: Optional[str] = None
+#     disabled: Optional[bool] = None
 
 class UserInDB(User):
     hashed_password: str
@@ -56,12 +58,15 @@ def get_user(db, username: str):
         user_dict = db[username]
         return UserInDB(**user_dict)
 
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
+#def authenticate_user(fake_db, username: str, password: str):
+    #user = get_user(fake_db, username)
+def authenticate_user(username: str, password: str):
+    user = User.get_or_none(User.email == username)
     if not user:
         return False
     
-    if not verify_password(password, user.hashed_password):
+    #if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
 
     return user
@@ -92,20 +97,20 @@ async def get_current_user(token: str = Depends(oauth2scheme)):
     try:
         print(f'TOKEN: {token}')
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            print('no username?')
+        email: str = payload.get("sub")
+        if email is None:
             raise credentials_exception
-        token_data = TokenData(username=username)
+        #token_data = TokenData(username=username)
     except JWTError:
         print('JWTError occurred')
         raise credentials_exception
-    user = get_user(fake_users_db, username=token_data.username)
+    #user = get_user(fake_users_db, email=email)
+    user = User.get_or_none(User.email == email)
     if user is None:
         raise credentials_exception
     return user
 
 async def get_current_active_user(current_user: User = Depends(get_current_user)):
-    if current_user.disabled:
+    if not current_user.active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user

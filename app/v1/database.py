@@ -12,6 +12,28 @@ class BaseModel(Model):
         database = db
 
 
+class User(BaseModel):
+    full_name = CharField()
+    email = CharField()
+    about = TextField()
+    password = CharField()
+    created_date = DateTimeField(default=datetime.now)
+    active = BooleanField(default=True)
+
+    def create(self) -> None:
+        self.save()
+        return self
+
+
+    @staticmethod
+    def hash_password(text_password):
+        from passlib.context import CryptContext
+
+        password_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+
+        return password_context.hash(text_password)
+
+
 class Author(BaseModel):
     name = CharField()
     email = CharField()
@@ -23,7 +45,7 @@ class Article(BaseModel):
     subtitle = CharField()
     posted_date = DateTimeField(default=datetime.now)
     markup_content = TextField()
-    author = ForeignKeyField(Author, lazy_load=False) # lazy load assumes we're using the ID field in Author
+    author = ForeignKeyField(User, lazy_load=False) # lazy load assumes we're using the ID field in Author
 
 
     def create(self) -> None:
