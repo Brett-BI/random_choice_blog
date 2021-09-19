@@ -1,6 +1,6 @@
 from pydantic import BaseModel
 
-from typing import Optional
+from typing import Optional, Dict
 
 class ArticleRequestModel(BaseModel):
     id: Optional[str]
@@ -16,7 +16,7 @@ class ArticleResponseModel(BaseModel):
     subtitle: str
     markup_content: str
     posted_date: str
-    author: int
+    author: Dict
 
 
 class Article(BaseModel):

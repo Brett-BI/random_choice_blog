@@ -65,6 +65,9 @@ def get_random_article(count: Optional[int] = 1):
 @app.get('/article/latest', response_model=List[ArticleResponseModel])
 def get_latest_articles(count: Optional[int] = 1):
     _articles = Article().get_articles(count)
+    print(_articles)
+    for a in _articles:
+        print(a)
     #sleep(3)
     return jsonable_encoder(_articles)
 
@@ -72,10 +75,12 @@ def get_latest_articles(count: Optional[int] = 1):
 # def get_article(article_id, token: str = Depends(oauth2scheme)):
 @app.get('/article/{article_id}', response_model=ArticleResponseModel)
 def get_article(article_id):
-    _article = Article.get_or_none(Article.id == article_id)
-    print(type(_article.__data__))
+    #_article = Article.get_or_none(Article.id == article_id)
+    _article = Article().get_article(article_id)
+    _fa = _article.__data__
+    _fa['author'] = _article.author.__data__
 
-    return jsonable_encoder(_article.__data__) # note: JSONResponse ignores the response_model
+    return jsonable_encoder(_fa) # note: JSONResponse ignores the response_model
 
 
 @app.patch('/article/{article_id}', status_code=201, response_model=ArticleResponseModel)

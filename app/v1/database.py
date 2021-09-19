@@ -58,14 +58,25 @@ class Article(BaseModel):
     
 
     def get_article(self, article_id: int) -> Dict:
-        return self.select().filter_by(self.id == article_id).limit(1)
+        _article = self.select(Article, User.id, User.full_name).join(User).where(Article.id == article_id).limit(1)
+        if _article:
+            return _article[0]
+        else:
+            return None
+        #return self.select().filter_by(self.id == article_id).join(User, on=(self.author == User.id)).limit(1)
 
     
     def get_articles(self, count: int = 1) -> List[dict]:
-        _articles = self.select().order_by(Article.posted_date.desc()).limit(count) # self.posted_date doesn't work for some reason...
+        _articles = self.select(Article, User.id, User.full_name).join(User).order_by(Article.posted_date.desc()).limit(count) # self.posted_date doesn't work for some reason...
         models = []
         for _a in _articles:
-            models.append(_a.__data__)
+            _author = _a.author.__data__
+            #print(f'_author is: {_author}')
+            _temp_article = _a.__data__
+            #print(f'_temp_article is: {_temp_article}')
+            _temp_article['author'] = _author
+            #print(_temp_article)
+            models.append(_temp_article)
         
         return models
 
