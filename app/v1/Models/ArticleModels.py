@@ -6,7 +6,8 @@ class ArticleRequestModel(BaseModel):
     id: Optional[str]
     title: str
     subtitle: str
-    author: int = 1
+    summary: str
+    author: int
     markup_content: str
 
 
@@ -14,6 +15,7 @@ class ArticleResponseModel(BaseModel):
     id: str
     title: str
     subtitle: str
+    summary: str
     markup_content: str
     posted_date: str
     author: Dict
@@ -22,5 +24,6 @@ class ArticleResponseModel(BaseModel):
 class Article(BaseModel):
     title: str
     subtitle: str
+    summary: str
     markup_content: str
     posted_date: str

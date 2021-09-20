@@ -41,9 +41,10 @@ class Author(BaseModel):
 
 
 class Article(BaseModel):
-    title = CharField()
-    subtitle = CharField()
+    title = CharField(max_length=250)
+    subtitle = CharField(max_length=250)
     posted_date = DateTimeField(default=datetime.now)
+    summary = CharField(max_length=250)
     markup_content = TextField()
     author = ForeignKeyField(User, lazy_load=False) # lazy load assumes we're using the ID field in Author
 

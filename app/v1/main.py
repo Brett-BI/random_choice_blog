@@ -23,7 +23,8 @@ from typing import List, Optional
 app = FastAPI()
 
 db = db
-#db.create_tables([UserTable])
+
+db.create_tables([Article])
 
 origins = [
     "http://localhost",
