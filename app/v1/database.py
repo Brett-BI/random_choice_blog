@@ -4,8 +4,11 @@ from playhouse.shortcuts import model_to_dict
 from datetime import datetime
 from typing import Dict, List
 
-db = PostgresqlDatabase('RCv2', user='postgres', password='password')
+from config import Settings
 
+settings = Settings()
+#db = PostgresqlDatabase('RCv2', user='postgres', password='password')
+db = PostgresqlDatabase(settings.db_name, user=settings.db_username, password=settings.db_password)
 
 class BaseModel(Model):
     class Meta:

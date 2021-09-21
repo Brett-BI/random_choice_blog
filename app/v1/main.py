@@ -18,9 +18,10 @@ from datetime import datetime, timedelta
 import json
 from typing import List, Optional
 
+from config import Settings
 
-
-app = FastAPI()
+settings = Settings()
+app = FastAPI(version=1.0, title=settings.app_name)
 
 db = db
 
